@@ -1,7 +1,4 @@
 package ru.smartsarov.simplesnmp;
-
-import java.io.InputStream;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
