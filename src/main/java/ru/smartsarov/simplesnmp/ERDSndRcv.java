@@ -1,5 +1,6 @@
 package ru.smartsarov.simplesnmp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import com.google.gson.Gson;
@@ -67,27 +68,11 @@ public class ERDSndRcv {
 			if (mp >= 0) {
 				int rs = st.snmpGetInt(host, community, MONITOR_SENSOR3);
 				if (rs >= 0) {
-					ERDState erd = new ERDState(LocalDateTime.now(), ec==1, rs==1, mp==1);
+					ERDState erd = new ERDState(Instant.now().toEpochMilli(), ec==1, rs==1, mp==1);
 					return gs.toJson(erd);
 				}
 			}
 		}
-
-		return gs.toJson(new ERDState(LocalDateTime.now()));
+		return gs.toJson(new ERDState(Instant.now().getEpochSecond()));
 	}
-	
-/*
- * Get timestamp
- * 
- * 
- * 
- * */	
-	public String GetTimestamp() {
-		
-		System.currentTimeMillis();
-		
-		return null;
-	}
-	
-	
 }
