@@ -1,7 +1,6 @@
 package ru.smartsarov.simplesnmp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import com.google.gson.Gson;
 
@@ -23,9 +22,26 @@ public class ERDSndRcv {
 	 * Static method for send PDU to reset contact DO1
 	 * 
 	 * */
-	static void erdSendOn() {
+	static String erdSendOn() {
 		SnmpTest st = new SnmpTest();
 		st.snmpSetInt(Props.get().getProperty("simplesnmp.ip", "127.0.0.1"), Props.get().getProperty("simplesnmp.write_community", "public"), RESET_SMART_CONTACT_DO1_OID, RESET_SMART_CONTACT_DO1_VALUE);	
+	
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return erdGetInfo();
+	}
+	
+	/*
+	 * Static method for send PDU to reset contact DO1
+	 * 
+	 * */
+	public static void erdSendOn(String ip, String community) {
+		SnmpTest st = new SnmpTest();
+		st.snmpSetInt(ip, community, RESET_SMART_CONTACT_DO1_OID, RESET_SMART_CONTACT_DO1_VALUE);	
 	}
 	
 	
@@ -33,7 +49,7 @@ public class ERDSndRcv {
 	 * Static method for send to 2 PDU to reset contact DO2
 	 * 
 	 * */
-	static void erdSendOff() {
+	static String erdSendOff() {
 		SnmpTest st = new SnmpTest();
 		String host = Props.get().getProperty("simplesnmp.ip", "127.0.0.1");
 		String community = Props.get().getProperty("simplesnmp.write_community", "public");
@@ -51,7 +67,30 @@ public class ERDSndRcv {
 			e.printStackTrace();
 		}
 		st.snmpSetInt(host, community, REMOTE_CONTROL_CONTACT_DO2_OID, MAN_OFF_SMART_CONTACT_DO1_VALUE);	
+		return erdGetInfo();
 	}	
+	
+	/*
+	 * Static method for send to 2 PDU to reset contact DO2
+	 * 
+	 * */
+	public static void erdSendOff(String ip, String community) {
+		SnmpTest st = new SnmpTest();
+		st.snmpSetInt(ip, community, REMOTE_CONTROL_CONTACT_DO2_OID, MAN_ON_SMART_CONTACT_DO1_VALUE);	
+		int time_out=0;
+		try {
+			time_out = Integer.parseInt(Props.get().getProperty("simplesnmp.cmd_off_timer", "3000"));
+		}catch(NumberFormatException e){
+			time_out=3000;
+		}
+		try {
+			Thread.sleep(time_out);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		st.snmpSetInt(ip, community, REMOTE_CONTROL_CONTACT_DO2_OID, MAN_OFF_SMART_CONTACT_DO1_VALUE);	
+	}
 	
 	/*
 	 * Static method to Get Information about state of DO/DI contacts
@@ -68,11 +107,11 @@ public class ERDSndRcv {
 			if (mp >= 0) {
 				int rs = st.snmpGetInt(host, community, MONITOR_SENSOR3);
 				if (rs >= 0) {
-					ERDState erd = new ERDState(Instant.now().toEpochMilli(), ec==1, rs==1, mp==1);
+					ERDState erd = new ERDState(Instant.now().toEpochMilli(), ec==1, mp==1, rs==1);
 					return gs.toJson(erd);
 				}
 			}
 		}
-		return gs.toJson(new ERDState(Instant.now().getEpochSecond()));
+		return gs.toJson(new ERDState(Instant.now().toEpochMilli()));
 	}
 }
