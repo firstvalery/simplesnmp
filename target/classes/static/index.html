@@ -1,5 +1,28 @@
-<html>
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<meta charset="UTF-8">
+	<title>Lift description</title>
+</head>
+
 <body>
-	<h2>Hello World!</h2>
+	<p>
+	<h2>Описание модуля "Освещение"</h2>
+	<p>Данный модуль управляет освещением зданий. Реализовано оперативное включение и отключение, работа по расписанию. Для работы по расписанию необходимо зарегистрировать в системе пользователя, устройство управления нагрузкой, назначить устройству интерфейс для управления про протололу SNMPv1 </p>
+	<p>
+	<h2>Описание методов модуля щсвещение</h2>
+	<p></p>
+	<ul>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/on">http://sarov.us.to:9900/snmp/on</a> включение освещения тестового объекта<br></li>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/states">http://sarov.us.to:9900/snmp/off</a> отключение освещения тестового объекта</li>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/state">http://sarov.us.to:9900/snmp/state</a> состояние силовой цепи освещения тестового объекта</li>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/users/add">http://sarov.us.to:9900/snmp/scheduler/users/add</a> - ввод нового пользователя. GET queryparam. В параметре username=Ivan Ivanov передать уникальное имя нового пользователя</li>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/device/add">http://sarov.us.to:9900/snmp/scheduler/device/add</a> - ввод нового устройства. GET queryparam. community=public&ip=192.168.1.1&name=ERD1. Имя устройства и Ip адрес должны быть уникальными. Community - параметр для SNMP v1</li>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/job/add">http://sarov.us.to:9900/snmp/scheduler/job/add</a> - ввод новой задачи. GET queryparam. ob_ts=1540148060&user=Ivan Ivanov&command=1&device_name=ERD1. ob_ts - время выполнения задачи в формате UNIX timestamp. Command 1/2 для тестового объекта включить/отключить соответственно</li>
+		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/job/show">http://sarov.us.to:9900/snmp/scheduler/job/show</a> - отобразить расписание. GET queryparam. min_ts=0&max_ts=1600000000. min_ts, max_ts - временной интервал в формате UNIX timestamp. Возвращает json с описание задач. id - индекс задания. done - отметка о выполнении</li>
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/job/remove">http://sarov.us.to:9900/snmp/scheduler/job/remove</a> - удалить задание. GET queryparam. id=16. id - индекс удаляемой задачи</li>
+	</ul>
 </body>
 </html>

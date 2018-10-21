@@ -21,11 +21,12 @@ import ru.smartsarov.simplesnmp.job.UsersTable;
 
 
 @Path("/")
-@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+@Produces(MediaType.APPLICATION_JSON)
 public class SnmpService
 {
 	@GET
 	@Path("/")
+	@Produces(MediaType.TEXT_HTML + ";charset=UTF-8")
     public Response index()
     {
 		InputStream is = this.getClass().getResourceAsStream("/static/index.html");
