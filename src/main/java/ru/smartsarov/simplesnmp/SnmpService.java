@@ -3,6 +3,7 @@ package ru.smartsarov.simplesnmp;
 
 
 
+import java.io.InputStream;
 import java.sql.SQLException;
 
 import javax.ws.rs.GET;
@@ -20,9 +21,18 @@ import ru.smartsarov.simplesnmp.job.UsersTable;
 
 
 @Path("/")
-@Produces(MediaType.TEXT_HTML + ";charset=UTF-8")
-public class HelloService
+@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+public class SnmpService
 {
+	@GET
+	@Path("/")
+    public Response index()
+    {
+		InputStream is = this.getClass().getResourceAsStream("/static/index.html");
+    	return Response.status(Response.Status.OK).entity(is).build();
+    }
+	
+	
 	@GET
 	@Path("/on")
     public Response getMsgOn()
@@ -146,7 +156,7 @@ public class HelloService
     public Response check() throws ClassNotFoundException, SQLException
     {	
 		JobsTableAgregator.getCurrentJob(JobConstants.DELTA_FOR_CHECK);
-		return Response.status(Response.Status.OK).entity("Ok").build();
+		return Response.status(Response.Status.OK).entity("{}").build();
     }
 	
 	
