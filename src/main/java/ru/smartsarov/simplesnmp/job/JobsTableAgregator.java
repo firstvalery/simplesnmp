@@ -2,8 +2,11 @@ package ru.smartsarov.simplesnmp.job;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+
+
 import java.sql.SQLException;
 import java.time.Instant;
+
 import java.util.List;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -15,18 +18,20 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import ru.smartsarov.simplesnmp.Props;
+
 
 
 
 public class JobsTableAgregator {
 	
-	/* Get Connection to DB
+	/** Get Connection to DB
 	 * Returns Connection object
 	 */
 	public static Connection getConnect() throws ClassNotFoundException, SQLException {
 		Connection conn = null;
 		Class.forName("org.sqlite.JDBC");		
-		   conn = DriverManager.getConnection("jdbc:sqlite:D:/WORKSPACE/simplesnmp/src/main/resources/db/scheduler.db");
+		   conn = DriverManager.getConnection("jdbc:sqlite:"+Props.get().getProperty("simplesnmp.db_path"));
 		   conn.setAutoCommit(false);
 		   return conn;
 	} 
@@ -38,28 +43,14 @@ public class JobsTableAgregator {
 	 *  Performs a task for each JobDbBean object.
 	 *  Mark a task in the "done" field
 	 */
+	/*select jobs_table.command, device.community, device.desc, device_interface.ip 
+	from jobs_table
+	join device on jobs_table.device_id = device.id and device.removed = 0
+	join device_interface on device_interface.device_id = device.id and device_interface.removed = 0 
+	where jobs_table.done = 0 and jobs_table.remove = 0 
+	--jobs_table.job_ts between */
 	
-	public static void getCurrentJob(int delta) {
-		try {
-			Connection conn = getConnect();
-			String sql = "SELECT * FROM jobs_table WHERE job_ts >= ? AND job_ts < ? AND done = 0 AND remove = 0";
-			try {
-				ResultSetHandler<List<JobDbBean>> h = new BeanListHandler<JobDbBean>(JobDbBean.class);
-				
-				long curTimestamp = Instant.now().getEpochSecond();//take a current timestamp		
-				List<JobDbBean>jobList = new QueryRunner().query(conn, sql, h, curTimestamp, curTimestamp + delta);
-				
-				for(JobDbBean tmp : jobList) {
-					doJob(tmp, conn);
-				}
-				conn.commit();
-			}finally {
-				DbUtils.close(conn);
-			}	
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-	} 
+	
 	
 	
 	
@@ -68,148 +59,202 @@ public class JobsTableAgregator {
 	 * Uses a connection as parameter. Passes an exception SQLException further
 	 */
 	
-	private static void doJob(JobDbBean job, Connection conn) throws SQLException{
-		DeviceDbBean dev = getDeviceDbBean(job.getDevice_id(), conn);
-		switch (job.getCommand().toLowerCase()){
-		case "on":	
-				//ERDSndRcv.erdSendOn(dev.getIp(),dev.getCommunity());	
-				System.out.println(Instant.ofEpochSecond(job.getJob_ts(), 0) +  "     to device "+ dev.getDesc()+ " was send command On");
+	private static void doJob(JobTable job) {
+		switch (job.getCommand()){
+		case 1:	
+				//ERDSndRcv.erdSendOn(job.getIp(),job.getCommunity());	
+				System.out.println(Instant.ofEpochSecond(job.getJob_ts(), 0) +  "     to device "+ job.getName()+ " was send command On");
 			break;
-		case "off":	
-				//ERDSndRcv.erdSendOff(dev.getIp(),dev.getCommunity());	
-				System.out.println(Instant.ofEpochSecond(job.getJob_ts(), 0) +  "     to device "+ dev.getDesc()+ " was send command Off");
+		case 2:	
+				//ERDSndRcv.erdSendOff(job.getIp(),job.getCommunity());	
+				System.out.println(Instant.ofEpochSecond(job.getJob_ts(), 0) +  "     to device "+ job.getName()+ " was send command Off");
 			break;
 		default:
 			break;
 		}
-		String sql = "UPDATE jobs_table SET done = 1 WHERE id = ?";//Mark a done 
-		
-		new QueryRunner().update(conn, sql, job.getId());
-		
+		job.setDone(true);//Set "done" for job
 	}
 	
-	/*
-	 * Create the job table. It's just an instrument for creating table
+	/**
+	 * Creating tables instrument
 	 */
-	public static String createTableJob() {	
-	    try {
-	    	
+	public static String createTables() throws ClassNotFoundException, SQLException {	
 	    	Connection conn = getConnect();
+	    	QueryRunner qr = new QueryRunner();
 	    	try {
-	    		QueryRunner qr = new QueryRunner();
-	    		
-	    		String sql = "CREATE TABLE IF NOT EXISTS jobs_table (id INTEGER PRIMARY KEY, job_ts INTEGER, "+
-	    		"command TEXT, user TEXT, device_id INTEGER, set_ts INTEGER, done NUMERIC, remove NUMERIC)";
-	    		qr.update(conn, sql);
-	    		
-	    		sql = "CREATE TABLE IF NOT EXISTS device_table (id INTEGER PRIMARY KEY, device_id INTEGER, ip TEXT, community TEXT, desc TEXT)";
-	    		qr.update(conn, sql);
-	    		
-			     conn.commit();
-			     
-			     return "Success!";
+	    		qr.update(conn, JobConstants.CREATE_JOBS_TABLE);
+	    		qr.update(conn, JobConstants.CREATE_DEVICE_TABLE);
+	    		qr.update(conn, JobConstants.CREATE_USERS_TABLE);
+			    conn.commit();     
+			    return "Ok";
 	    	}finally {
 	    		DbUtils.close(conn);
-	    	}
-	    }catch(Exception e) {
-	    	return e.getMessage();
-	    }   
+	    	}  
+	}
+	
+	
+	/**
+	 * Generalized method for adding a new record
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 * 
+	 */
+	public static <V> String insertNewRecord(boolean checkFlag, Class<V> classTable, String insertConst,
+			String selectConst, Object selectParam, Object... insertParams) 
+					throws ClassNotFoundException, SQLException 
+					  {
+		Connection conn = getConnect();
+		try {
+			if( !checkFlag || isRecordExist(classTable, selectConst, conn, selectParam )==null){//checking for existence
+				new QueryRunner().update(conn, insertConst, insertParams);
+				conn.commit();     
+			    return "new record was added";
+			}else return "record already exists!";
+		}finally {
+			DbUtils.close(conn);
+		}  	
+	}
+	
+/**
+ * Generalized method for checking the existence of an entry in a table
+ * 
+ * @throws SQLException 
+ */
+	private static <V> V isRecordExist(Class<V> classTable, String selectConst, Connection conn, Object obj) throws SQLException {	
+		ResultSetHandler<V> h = new BeanHandler<V>(classTable);
+		V rs = new QueryRunner().query(conn, selectConst, h, obj );
+		return rs;
+	}
+	
+	/**
+	 * Generalized method for getting an entries List from a table
+	 * 
+	 * @throws SQLException 
+	 */	
+	private static <V> List<V> getRecordList(Class<V> classTable, String selectConst, Connection conn, Object... obj) throws SQLException {	
+		ResultSetHandler<List<V>> h = new BeanListHandler<V>(classTable);
+		List<V> rs = new QueryRunner().query(conn, selectConst, h, obj );
+		return rs;
+	}
+	
+	
+	/**
+	 * Generalized method for adding a new device
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 * 
+	 */
+	public static String insertNewDevice(String ip,  String community,  String name) 
+					throws ClassNotFoundException, SQLException 
+					  {
+		Connection conn = getConnect();
+		try {
+			if(getRecordList(DeviceTable.class, JobConstants.SELECT_BY_IP_NAME, conn, ip, name ).size()==0){//checking for existence
+				new QueryRunner().update(conn, JobConstants.INSERT_DEVICE,  community, name, ip);
+				conn.commit();     
+			    return "new record was added";
+			}else return "IP address or name of device already exists!";
+		}finally {
+			DbUtils.close(conn);
+		}  	
+	}
+	
+	 
+	/**
+	 * Specialized method for inserting new job
+	 * with checking user and device existence
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 */
+	
+	public static String insertNewJob(long job_ts, int command, String user, String device_name) throws ClassNotFoundException, SQLException {
+		Connection conn = getConnect();
+		try {
+			//checking for user existence
+			UsersTable rs_user = isRecordExist(UsersTable.class, JobConstants.SELECT_BY_USER_NAME, conn, user);
+			if (rs_user==null) return "User "+ user + " is not registered in system";
+			//checking for device_id existence
+			DeviceTable rs_device = isRecordExist(DeviceTable.class, JobConstants.SELECT_BY_NAME, conn, device_name);
+			if (rs_device ==null) return "Device "+ device_name + " is not registered in system";
+			
+			//insert a job
+			new QueryRunner().update(conn, JobConstants.INSERT_JOB, job_ts, command, rs_user.getId(), rs_device.getId(), Instant.now().getEpochSecond());
+			conn.commit();
+			return "new job was added";
+		}finally {
+			DbUtils.close(conn);
+		}	  
 	}
 	
 	
 	
-	
-	/*
-	 * Insert the job to DB from JobDbBean object
-	 */
-	public static int setJobToDb(JobDbBean job){	
-	    try {
-	    	String sql = "insert into jobs_table"+
-	    						"(job_ts, command, user, device_id, set_ts, done, remove)"+
-	    																		"values(?,?,?,?,?,?,?)";
-	    	Connection conn = getConnect();
-	    	try {
-	    		int res = new QueryRunner().update(conn, sql, job.getJob_ts(), job.getCommand(), job.getUser(),
-	    											job.getDevice_id(), job.getSet_ts(), job.isDone(), job.isRemove());
-	    		conn.commit();
-	    		return res;
-	    	}finally {
-	    		DbUtils.close(conn);
-	    	}
-	    }catch(Exception e) {
-	    	return 0;
-	    }   
-	}
-	
-	
-	/*
-	 * Create a JobDbBean object from json
-	 * TODO
-	 */
-//	public static JobDbBean createJobDbBeanFromJson(String str) {
-//		Gson gson = new GsonBuilder().create();
-//		JobDbBean job =  gson.fromJson(str, JobDbBean.class);
-//				job.setSet_ts(Instant.now().getEpochSecond());
-//				job.setDone(false);
-//				return job;
-//	}
-	
-	/*
+
+	/**
 	 * Shows scheduled jobs  between two timestampes
-	 * returns a json of JobDbBean elements
+	 * returns a json of JobJson elements
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
 	 */
-	public static String getJobsFrom(long minTimestamp, long maxTimestamp)  {	
+	public static String getJobsFrom(long minTimestamp, long maxTimestamp) throws SQLException, ClassNotFoundException {	
+		Connection conn = getConnect();	
 		try {
-			 Connection conn = getConnect();	
-			 String sql = "SELECT * FROM jobs_table WHERE job_ts >= ? AND job_ts < ?";
-			 ResultSetHandler<List<JobDbBean>> h = new BeanListHandler<JobDbBean>(JobDbBean.class);
-			 try {
-				 List<JobDbBean>jobList = new QueryRunner().query(conn, sql, h, minTimestamp, maxTimestamp);
-				 Gson gson = new GsonBuilder().create();
-				 return gson.toJson(jobList);
-			 }
-			 finally {
+			List<JobTable>jobList = getRecordList(JobTable.class, JobConstants.SELECT_JOBS_BETWEEN, conn, minTimestamp, maxTimestamp);
+			Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+			return gson.toJson(jobList);
+		}finally {
 					DbUtils.close(conn);
-			 } 
-		}catch(Exception e) {
-			return "[]";
-		}	
+			 }
 	}
 	
 	
-	/*
-	 * Mark to remove job from task by it's id
-	 * 
+	/**
+	 * Marks to remove job from task by it's id
 	 */
-	public static int removeJob(int id)  {	
-		try {
+	public static String removeJob(int id) throws ClassNotFoundException, SQLException  {	
 			 Connection conn = getConnect();	
-			 String sql = "UPDATE jobs_table SET remove = 1 WHERE id = ?";
 			 try {
-				 int res = new QueryRunner().update(conn, sql, id);
+				 new QueryRunner().update(conn, JobConstants.MARK_FOR_REMOVING, id);
 			     conn.commit();
-			     return res;
+			     return "job was deleted";
 			 }
 			 finally {
 					DbUtils.close(conn);
 			 } 
-		}catch(Exception e) {
-			return 0;
-		}	
 	}
+	
+	
+	/**
+	 * Gets jobs from interval between current time and current time plus delta.
+	 * Do this jobs immediately
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 */
 		
 	
-	/*
-	 * Selects device bean by device_id
-	 * Uses a connection as parameter. Passes an exception SQLException further
-	 * 
-	 */
+	public static void getCurrentJob(int delta) throws SQLException, ClassNotFoundException {
+			Connection conn = getConnect();
+			try {
+				long curTimestamp = Instant.now().getEpochSecond();//take a current timestamp		
+				List<JobTable> jobList = getRecordList(JobTable.class, JobConstants.SELECT_JOBS_BETWEEN,
+												conn, curTimestamp, curTimestamp + delta);
+							
+				jobList.stream().forEach(j-> {//do job for each element
+						doJob(j);
+				});
+				
+				StringBuilder sb = new StringBuilder(10);//make string like this: 1,2,3,4,5,....n,
+				jobList.stream().filter(j -> j.isDone())//where "1,2,3,4,5,....n,"` is the id of completed jobs
+								.forEach(j -> sb.append(String.valueOf(j.getId()).concat(",")));
+				
+				String st = sb.toString();
+				String sql = JobConstants.MARK_FOR_DONE+ "(".concat(st.substring(0,st.lastIndexOf(","))).concat(")");
+				new QueryRunner().update(conn, sql);
+
+				conn.commit();
+			}finally {
+				DbUtils.rollbackAndClose(conn);
+			}	
+	} 
 	
-	private static DeviceDbBean getDeviceDbBean(int device_id, Connection conn) throws SQLException {
-	
-			 String sql = "SELECT * FROM device_table WHERE device_id = ?";
-			 ResultSetHandler<DeviceDbBean> h = new BeanHandler<DeviceDbBean>(DeviceDbBean.class);  
-			 DeviceDbBean rs = new QueryRunner().query(conn, sql, h, device_id );
-			 return rs;
-	}
+
 }

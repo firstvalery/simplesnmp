@@ -1,6 +1,9 @@
 package ru.smartsarov.simplesnmp;
 
-import java.time.Instant;
+
+
+
+import java.sql.SQLException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -9,8 +12,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ru.smartsarov.simplesnmp.job.JobDbBean;
+
+import ru.smartsarov.simplesnmp.job.JobConstants;
 import ru.smartsarov.simplesnmp.job.JobsTableAgregator;
+import ru.smartsarov.simplesnmp.job.UsersTable;
 
 
 
@@ -43,52 +48,104 @@ public class HelloService
 	@Path("/scheduler/create_table")
     public Response createTable()
     {	
-		return Response.status(Response.Status.OK).entity(JobsTableAgregator.createTableJob()).build();
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.createTables()).build();
+		} catch (ClassNotFoundException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build();
+		} catch (SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build();
+		}
     }
 	
 	
-	/*
+	
+	
+	
+	
+
+	
+
+	
+	@GET
+	@Path("/scheduler/users/add")
+    public Response addUser(@QueryParam("username") String userName)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator
+					.insertNewRecord(true, UsersTable.class, JobConstants.INSERT_USER , JobConstants.SELECT_BY_USER_NAME, userName, userName)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}	
+    }
+	
+	@GET
+	@Path("/scheduler/device/add")
+    public Response addDevice(
+    		@QueryParam("community") String community,
+    		@QueryParam("name") String name,
+    		@QueryParam("ip") String ip)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator
+					.insertNewDevice(ip, community, name)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}	
+    }
+	
+	/**
 	 * Inserting new job in scheduler
 	 * 
-	 * */
+	 */
 	@GET
-	@Path("/scheduler/setjob")
+	@Path("/scheduler/job/add")
     public Response create(
     @QueryParam("job_ts") long job_ts,
-    @QueryParam("command") String command,
+    @QueryParam("command") int command,
     @QueryParam("user") String user,
-    @QueryParam("device_id") int device_id)
+    @QueryParam("device_name") String device_name)
     {
-        JobsTableAgregator.setJobToDb(new JobDbBean(0,job_ts, command, user, device_id, Instant.now().getEpochSecond(),false,false));
-		return Response.status(Response.Status.OK).entity("insert job success").build();
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.insertNewJob(job_ts, command, user, device_name)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
     }
 	
-	/*
+	/**
 	 * Show jobs between two timestamps
 	 * 
-	 * */
+	 */
 	@GET
-	@Path("/scheduler/showjobs")
+	@Path("/scheduler/job/show")
     public Response create(
     @QueryParam("min_ts") long min_ts,
     @QueryParam("max_ts") long max_ts)
-    { 
-		return Response.status(Response.Status.OK).entity( JobsTableAgregator.getJobsFrom(min_ts, max_ts)).build();
+    { 	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.getJobsFrom(min_ts, max_ts)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
     }
 	
 	@GET
-	@Path("/scheduler/removejob")
+	@Path("/scheduler/job/remove")
     public Response removejob(
     @QueryParam("id") int id)
     {	
-		return Response.status(Response.Status.OK).entity("removed: "+JobsTableAgregator.removeJob(id)+ " job(s)").build();
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.removeJob(id)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
     }
 	
 	@GET
-	@Path("/scheduler/check")
-    public Response check()
+	@Path("/scheduler/job/check")
+    public Response check() throws ClassNotFoundException, SQLException
     {	
-		JobsTableAgregator.getCurrentJob(60);
+		JobsTableAgregator.getCurrentJob(JobConstants.DELTA_FOR_CHECK);
 		return Response.status(Response.Status.OK).entity("Ok").build();
     }
 	
