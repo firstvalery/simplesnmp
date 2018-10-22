@@ -1,7 +1,10 @@
 package ru.smartsarov.simplesnmp.job;
 
+import com.google.gson.annotations.Expose;
+
 public class UsersTable {
 	private int id;
+	@Expose
 	private String user_name;
 	public int getId() {
 		return id;

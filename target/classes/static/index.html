@@ -23,6 +23,10 @@
 		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/job/add">http://sarov.us.to:9900/snmp/scheduler/job/add</a> - ввод новой задачи. GET queryparam. job_ts=1540148060&user=Ivan Ivanov&command=1&device_name=ERD1. job_ts - время выполнения задачи в формате UNIX timestamp. Command 1/2 для тестового объекта включить/отключить соответственно</li>
 		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/job/show">http://sarov.us.to:9900/snmp/scheduler/job/show</a> - отобразить расписание. GET queryparam. min_ts=0&max_ts=1600000000. min_ts, max_ts - временной интервал в формате UNIX timestamp. Возвращает json с описание задач. id - индекс задания. done - отметка о выполнении</li>
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/job/remove">http://sarov.us.to:9900/snmp/scheduler/job/remove</a> - удалить задание. GET queryparam. id=16. id - индекс удаляемой задачи</li>
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/users/show">http://sarov.us.to:9900/snmp/scheduler/users/show</a> - отобразить юзеров. GET</li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/device/show">http://sarov.us.to:9900/snmp/scheduler/device/show</a> - отобразить устройства. GET</li>		
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/users/remove">http://sarov.us.to:9900/snmp/scheduler/users/remove</a> - удалить юзера. GET queryparam. user_name=Ivan Ivanov</li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/device/remove">http://sarov.us.to:9900/snmp/scheduler/device/remove</a> - удалить устройство. GET queryparam. name=Moxa7410</li>	
 	</ul>
 </body>
 </html>

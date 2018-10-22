@@ -203,13 +203,13 @@ public class JobsTableAgregator {
 	
 	
 	
-
-	/**
+/*
+	*//**
 	 * Shows scheduled jobs  between two timestampes
 	 * returns a json of JobJson elements
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
-	 */
+	 *//*
 	public static String getJobsFrom(long minTimestamp, long maxTimestamp) throws SQLException, ClassNotFoundException {	
 		Connection conn = getConnect();	
 		try {
@@ -220,17 +220,40 @@ public class JobsTableAgregator {
 					DbUtils.close(conn);
 			 }
 	}
+	*/
+	
+	
+	
 	
 	
 	/**
-	 * Marks to remove job from task by it's id
+	 * Shows select without params 
+	 * returns a json of elements
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
 	 */
-	public static String removeJob(int id) throws ClassNotFoundException, SQLException  {	
+	public static <V> String getJsonSelect(Class<V> classTable, String selectConstant, Object...params) throws SQLException, ClassNotFoundException {	
+		Connection conn = getConnect();	
+		try {
+			List<V>UsersList = getRecordList(classTable, selectConstant, conn, params);
+			Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+			return gson.toJson(UsersList);
+		}finally {
+					DbUtils.close(conn);
+			 }
+	}
+	
+		
+	
+	/**
+	 * Marks to remove record by it's parameter
+	 */
+	public static String removeElement(String columnConstant, Object param) throws ClassNotFoundException, SQLException  {	
 			 Connection conn = getConnect();	
 			 try {
-				 new QueryRunner().update(conn, JobConstants.MARK_FOR_REMOVING, id);
+				 new QueryRunner().update(conn, columnConstant, param);
 			     conn.commit();
-			     return getJsonMessage("job was deleted");
+			     return getJsonMessage("record was deleted");
 			 }
 			 finally {
 					DbUtils.close(conn);
@@ -273,6 +296,17 @@ public class JobsTableAgregator {
 				DbUtils.rollbackAndClose(conn);
 			}	
 	} 
+	
+	
+	public static String getUsers() {
+		return null;
+	}
+	
+	
+	public static String getDevices() {
+		return null;
+	}
+	
 	
 
 }

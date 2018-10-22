@@ -13,8 +13,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
+import ru.smartsarov.simplesnmp.job.DeviceTable;
 import ru.smartsarov.simplesnmp.job.JobConstants;
+import ru.smartsarov.simplesnmp.job.JobTable;
 import ru.smartsarov.simplesnmp.job.JobsTableAgregator;
 import ru.smartsarov.simplesnmp.job.UsersTable;
 
@@ -88,6 +89,29 @@ public class SnmpService
 			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
 		}	
     }
+	@GET
+	@Path("/scheduler/users/show")
+    public Response showUsers()
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.getJsonSelect(UsersTable.class, JobConstants.SELECT_USERS)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}	
+    }
+	
+	@GET
+	@Path("/scheduler/users/remove")
+    public Response removeUser(
+    @QueryParam("user_name") String user_name)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					removeElement(JobConstants.MARK_FOR_REMOVING_USER_BY_NAME,user_name)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
 	
 	@GET
 	@Path("/scheduler/device/add")
@@ -104,13 +128,40 @@ public class SnmpService
 		}	
     }
 	
+	@GET
+	@Path("/scheduler/device/remove")
+    public Response removeDevice(
+    @QueryParam("name") String name)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					removeElement(JobConstants.MARK_FOR_REMOVING_DEVICE_BY_NAME,name)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
+	
+	@GET
+	@Path("/scheduler/device/show")
+    public Response showDevices()
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.getJsonSelect(DeviceTable.class, JobConstants.SELECT_DEVICES)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}	
+    }	
+	
+	
+	
+	
 	/**
 	 * Inserting new job in scheduler
 	 * 
 	 */
 	@GET
 	@Path("/scheduler/job/add")
-    public Response create(
+    public Response createJob(
     @QueryParam("job_ts") long job_ts,
     @QueryParam("command") int command,
     @QueryParam("user") String user,
@@ -129,12 +180,13 @@ public class SnmpService
 	 */
 	@GET
 	@Path("/scheduler/job/show")
-    public Response create(
+    public Response showJobs(
     @QueryParam("min_ts") long min_ts,
     @QueryParam("max_ts") long max_ts)
     { 	
 		try {
-			return Response.status(Response.Status.OK).entity(JobsTableAgregator.getJobsFrom(min_ts, max_ts)).build(); 
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					getJsonSelect(JobTable.class, JobConstants.SELECT_JOBS_BETWEEN, min_ts, max_ts)).build(); 
 		} catch (ClassNotFoundException | SQLException e) {
 			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
 		}
@@ -142,11 +194,12 @@ public class SnmpService
 	
 	@GET
 	@Path("/scheduler/job/remove")
-    public Response removejob(
+    public Response removeJob(
     @QueryParam("id") int id)
     {	
 		try {
-			return Response.status(Response.Status.OK).entity(JobsTableAgregator.removeJob(id)).build(); 
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					removeElement(JobConstants.MARK_FOR_REMOVING_JOBS_BY_ID,id)).build(); 
 		} catch (ClassNotFoundException | SQLException e) {
 			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
 		}

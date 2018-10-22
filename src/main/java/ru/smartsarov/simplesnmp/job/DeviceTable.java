@@ -1,10 +1,15 @@
 package ru.smartsarov.simplesnmp.job;
 
+import com.google.gson.annotations.Expose;
+
 public class DeviceTable {
 	private int id;
+	@Expose
 	private String community;
+	@Expose
 	private String name;
 	private boolean removed;
+	@Expose
 	private String ip;
 
 	public DeviceTable(int id, String community, String name, boolean removed, String ip) {

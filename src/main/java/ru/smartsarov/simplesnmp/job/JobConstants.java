@@ -12,7 +12,7 @@ public class JobConstants {
 	 * CREATE TABLE `device` constant
 	 */
 	public final static String CREATE_DEVICE_TABLE = "CREATE TABLE IF NOT EXISTS device (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"+
-			"community TEXT, name TEXT UNIQUE NOT NULL, ip TEXT NOT NULL UNIQUE, removed NUMERIC NOT NULL DEFAULT 0)";
+			"community TEXT, name TEXT NOT NULL, ip TEXT NOT NULL, removed NUMERIC NOT NULL DEFAULT 0)";
 	
 	/**
 	 * CREATE TABLE `users` constant
@@ -62,9 +62,23 @@ public class JobConstants {
 			" and jobs.job_ts between ? and ? ";
 	
 	/**
+	 * update jobs field removed statement
+	 */
+	public final static String MARK_FOR_REMOVING_JOBS_BY_ID = "UPDATE jobs SET removed = 1 WHERE id = ?";
+	
+	/**
 	 * update field removed statement
 	 */
-	public final static String MARK_FOR_REMOVING = "UPDATE jobs SET removed = 1 WHERE id = ?";
+	public final static String MARK_FOR_REMOVING_USER_BY_NAME = "UPDATE users SET removed = 1 WHERE user_name = ?";
+	
+	/**
+	 * update field removed statement
+	 */
+	public final static String MARK_FOR_REMOVING_DEVICE_BY_NAME = "UPDATE device SET removed = 1 WHERE name = ?";
+	
+	
+	
+	
 	
 	/**
 	 * a part of update field done statement
@@ -75,6 +89,19 @@ public class JobConstants {
 	 * The period of checking for new jobs
 	 */
 	public final static int DELTA_FOR_CHECK =  60;
+	
+	/**
+	 * Select all users statement
+	 */
+	public final static String SELECT_USERS = "SELECT users.id, users.user_name FROM users WHERE removed = 0";
+
+	/**
+	 * Select all devices statement
+	 */
+	public final static String SELECT_DEVICES = "SELECT device.id, device.community, device.ip, device.name FROM device WHERE removed = 0";
+	
+	
+	
 	
 }
 

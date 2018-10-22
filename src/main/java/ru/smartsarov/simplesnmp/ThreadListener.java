@@ -26,7 +26,7 @@ public class ThreadListener implements ServletContextListener{
 		
 		Trigger trigger1 = TriggerBuilder.newTrigger()
 									.withIdentity("CronTrigger", "group1")	
-				          			.withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?"))
+				          			.withSchedule(CronScheduleBuilder.cronSchedule("59 * * * * ?"))
 				                    .build();
 		
 		
