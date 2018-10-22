@@ -12,13 +12,13 @@ public class JobConstants {
 	 * CREATE TABLE `device` constant
 	 */
 	public final static String CREATE_DEVICE_TABLE = "CREATE TABLE IF NOT EXISTS device (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"+
-			"community TEXT, name TEXT UNIQUE, ip TEXT NOT NULL UNIQUE, removed NUMERIC NOT NULL DEFAULT 0)";
+			"community TEXT, name TEXT UNIQUE NOT NULL, ip TEXT NOT NULL UNIQUE, removed NUMERIC NOT NULL DEFAULT 0)";
 	
 	/**
 	 * CREATE TABLE `users` constant
 	 */
 	public final static String CREATE_USERS_TABLE = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,"+
-			" user_name TEXT, removed NUMERIC NOT NULL DEFAULT 0)";
+			" user_name TEXT NOT NULL, removed NUMERIC NOT NULL DEFAULT 0)";
 
 	/**
 	 * Insert new user in table "users" statement 
@@ -54,7 +54,7 @@ public class JobConstants {
 	 * Select list of jobs by min and mix timestamps statement
 	 */	
 	public final static String SELECT_JOBS_BETWEEN = "select jobs.id, jobs.job_ts, users.user_name, jobs.set_ts,"+
-			" jobs.command, device.name, device.ip,jobs.done, jobs.removed"+
+			" jobs.command, device.name, device.ip,jobs.done, jobs.removed, device.community"+
 			" from jobs"+
 			" join users on jobs.user = users.id and users.removed = 0"+
 			" join device on jobs.device_id = device.id and device.removed = 0"+
