@@ -357,10 +357,10 @@ public class JobsTableAgregator {
             int year = ld.getYear();
             int nextDay=0;
     		while(ld.plusDays(1).getYear()!=year+1) {// Run while not next year
-    			nextDay = (ld.getDayOfYear() > 365) ? 0 : 1;
+    			nextDay = (ld.getDayOfYear() > 364) ? 0 : 1;
     			List<Object> tmp = new ArrayList<>();
     			tmp.add(LocalDateTime.of(ld.plusDays(nextDay), 
-    					LocalTime.parse(sunnyList.get(ld.getDayOfYear()+1-nextDay).getOff_ts(), DateTimeFormatter.ISO_LOCAL_TIME)).
+    					LocalTime.parse(sunnyList.get(ld.getDayOfYear()-1+nextDay).getOff_ts(), DateTimeFormatter.ISO_LOCAL_TIME)).
     					toEpochSecond(ZoneOffset.ofHours(3)));
     			tmp.add(2);
     			tmp.add(rs_user.getId());
@@ -371,7 +371,7 @@ public class JobsTableAgregator {
     			
     			tmp = new ArrayList<>();
     			tmp.add(LocalDateTime.of(ld.plusDays(nextDay), 
-    					LocalTime.parse(sunnyList.get(ld.getDayOfYear()+1-nextDay).getOn_ts(), DateTimeFormatter.ISO_LOCAL_TIME)).
+    					LocalTime.parse(sunnyList.get(ld.getDayOfYear()-1+nextDay).getOn_ts(), DateTimeFormatter.ISO_LOCAL_TIME)).
     					toEpochSecond(ZoneOffset.ofHours(3)));
     			tmp.add(1);
     			tmp.add(rs_user.getId());
