@@ -12,8 +12,8 @@
 	<h2>Описание модуля "Освещение"</h2>
 	<p>Данный модуль управляет освещением зданий. Реализовано оперативное включение и отключение, работа по расписанию. Для работы по расписанию необходимо зарегистрировать в системе пользователя, устройство управления нагрузкой, назначить устройству интерфейс для управления про протололу SNMPv1 </p>
 	<p>
-	<h2>Описание методов модуля щсвещение</h2>
-	<p></p>
+	<h2>Описание методов модуля освещение</h2>
+	<p>!ВНИМАНИЕ! МОДУЛЬ УПРАВЛЯЕТ СИЛОВЫМИ ЦЕПЯМИ 0,4kV. БУДЬТЕ ОСТОРОЖНЫ!</p>
 	<ul>
 		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/on">http://sarov.us.to:9900/snmp/on</a> включение освещения тестового объекта<br></li>
 		<li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/states">http://sarov.us.to:9900/snmp/off</a> отключение освещения тестового объекта</li>
@@ -27,6 +27,7 @@
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/device/show">http://sarov.us.to:9900/snmp/scheduler/device/show</a> - отобразить устройства. GET</li>		
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/users/remove">http://sarov.us.to:9900/snmp/scheduler/users/remove</a> - удалить юзера. GET queryparam. user_name=Ivan Ivanov</li>	
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/device/remove">http://sarov.us.to:9900/snmp/scheduler/device/remove</a> - удалить устройство. GET queryparam. name=Moxa7410</li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9900/snmp/scheduler/sunnyjob/generate">http://sarov.us.to:9900/snmp/scheduler/sunnyjob/generate</a> - Установить расписание, основанное на продолжительности светогого дня до конца года. GET queryparam. device=ERD&user=Kalachev</li>	
 	</ul>
 </body>
 </html>

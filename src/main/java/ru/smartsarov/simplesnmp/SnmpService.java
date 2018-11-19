@@ -3,6 +3,7 @@ package ru.smartsarov.simplesnmp;
 
 
 
+
 import java.io.InputStream;
 import java.sql.SQLException;
 
@@ -18,6 +19,7 @@ import ru.smartsarov.simplesnmp.job.JobConstants;
 import ru.smartsarov.simplesnmp.job.JobTable;
 import ru.smartsarov.simplesnmp.job.JobsTableAgregator;
 import ru.smartsarov.simplesnmp.job.UsersTable;
+
 
 
 
@@ -213,6 +215,41 @@ public class SnmpService
 		return Response.status(Response.Status.OK).entity("{}").build();
     }
 	
+	@GET
+	@Path("/scheduler/sunny/insert")
+    public Response sunnyInsert() 
+    {	try {
+    	return Response.status(Response.Status.OK).entity(JobsTableAgregator.getSunnyFile(Props.get().getProperty("simplesnmp.sunny_file_path", "c:/conf/simplesnmp/scheduler.csv"))).build();
+	} catch (Exception e) {
+		return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+	}
+    }
 	
+	@GET
+	@Path("/scheduler/sunnyjob/generate")
+    public Response generateSunny(
+    	    @QueryParam("user") String user,
+    	    @QueryParam("device") String device) throws ClassNotFoundException, SQLException
+    {	
+		
+		try {
+	    	return Response.status(Response.Status.OK).entity(JobsTableAgregator.setSunnyScheduleForDevice(user,device)).build();
+		} catch (Exception e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
 	
+	@GET
+	@Path("/scheduler/sunnyjob/remove")
+    public Response removeSunny(
+    @QueryParam("device") String device)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					removeElement(JobConstants.MARK_FOR_REMOVING_JOBS_SUNNY,device)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
+
 }

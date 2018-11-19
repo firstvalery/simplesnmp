@@ -107,23 +107,23 @@
 		</dependency>
 		
 		<!-- jOOQ -->
-        <!--  dependency>
+        <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
             <version>${jooq.version}</version>
-        </dependency-->
+        </dependency>
         
-        <!-- dependency>
+        <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-meta</artifactId>
             <version>${jooq.version}</version>
-        </dependency-->
+        </dependency>
         
-        <!-- dependency>
+        <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-codegen</artifactId>
             <version>${jooq.version}</version>
-        </dependency-->
+        </dependency>
 		
 		<!-- Commons-dbutils -->
 		<dependency>
@@ -147,7 +147,12 @@
     		<groupId>org.quartz-scheduler</groupId>
     		<artifactId>quartz</artifactId>
     		<version>2.2.1</version>
-		</dependency>	
+		</dependency>
+		<dependency>
+		    <groupId>org.firebirdsql.jdbc</groupId>
+		    <artifactId>jaybird-jdk18</artifactId>
+		    <version>3.0.5</version>
+		</dependency>
 	</dependencies>
 
 	<build>

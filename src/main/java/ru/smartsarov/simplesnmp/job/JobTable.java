@@ -21,9 +21,11 @@ public class JobTable {
 	private String community;
 	private String ip;
 	private boolean removed;
+	@Expose
+	private boolean sunny;
 	
 	public JobTable(int id, long job_ts, String user, long set_ts, boolean done, int command, String name, String ip,
-			boolean removed,String community) {
+			boolean removed, String community, boolean sunny) {
 		this.id = id;
 		this.job_ts = job_ts;
 		this.user_name = user;
@@ -34,6 +36,7 @@ public class JobTable {
 		this.ip = ip;
 		this.removed = removed;
 		this.setCommunity(community);
+		this.sunny = sunny;
 	}
 	
 	public JobTable() {
@@ -47,6 +50,7 @@ public class JobTable {
 		this.ip = "";
 		this.removed = false;
 		this.setCommunity("");
+		this.sunny = false;
 	}
 	
 	
@@ -111,6 +115,14 @@ public class JobTable {
 
 	public void setCommunity(String community) {
 		this.community = community;
+	}
+
+	public boolean isSunny() {
+		return sunny;
+	}
+
+	public void setSunny(boolean sunny) {
+		this.sunny = sunny;
 	}
 
 	
