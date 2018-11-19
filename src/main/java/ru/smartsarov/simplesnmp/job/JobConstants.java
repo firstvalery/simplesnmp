@@ -25,7 +25,23 @@ public class JobConstants {
 	 */
 	public final static String CREATE_SUNNY_DAY_TABLE = "CREATE TABLE IF NOT EXISTS sunny_day (day INTEGER PRIMARY KEY AUTOINCREMENT,"+
 			" off_ts TEXT NOT NULL, on_ts TEXT NOT NULL)";
+	/**
+	 * CREATE TABLE `device_rules` constant
+	 */
+	public final static String CREATE_DEVICE_RULES_TABLE = "CREATE TABLE IF NOT EXISTS device_rules (" 
+			+"	id	INTEGER," + 
+			"	device_id	INTEGER," + 
+			"	work_t	TEXT," + 
+			"	weekend_t	TEXT," + 
+			"	removed	NUMERIC DEFAULT 0," + 
+			"	rule_type	INTEGER," + 
+			"	FOREIGN KEY(device_id) REFERENCES device(id) ON UPDATE CASCADE," + 
+			"	PRIMARY KEY(id));";
 
+	
+	
+	
+	
 	/**
 	 * Insert new user in table "users" statement 
 	 */

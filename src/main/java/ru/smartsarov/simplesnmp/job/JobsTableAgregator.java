@@ -80,6 +80,7 @@ public class JobsTableAgregator {
 			qr.update(conn, JobConstants.CREATE_DEVICE_TABLE);
 			qr.update(conn, JobConstants.CREATE_USERS_TABLE);
 			qr.update(conn, JobConstants.CREATE_SUNNY_DAY_TABLE);
+			qr.update(conn, JobConstants.CREATE_DEVICE_RULES_TABLE);
 			conn.commit();
 			return getJsonMessage("Tables was created");
 		} finally {
