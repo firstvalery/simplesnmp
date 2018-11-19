@@ -40,12 +40,23 @@ public class JobConstants {
 	 * Insert new device in table "device" statement
 	 */
 	public final static String INSERT_DEVICE = "INSERT INTO device (community, name, ip) values (?,?,?)";
+	
+	/**
+	 * Insert new device rule in table "device_rules" statement
+	 */
+	public final static String INSERT_DEVICE_RULE = "INSERT INTO device_rules (device_id, work_t, weekend_t,rule_type) values (?,?,?,?)";
+	/**
+	 * Select device rule by device_id and rule_type from table "device_rules" statement
+	 */
+	public final static String SELECT_DEVICE_RULE_BY_DEVICE_ID_AND_TYPE = "SELECT device_rules.device_id, device_rules.work_t, device_rules.weekend_t  "
+			+ "FROM device_rules WHERE device_rules.device_id = ? AND device_rules.removed = 0 AND device_rules.rule_type = ?";
+	public final static String SELECT_DEVICE_RULE_BY_DEVICE_ID = "SELECT device_rules.id, device_rules.device_id, device_rules.work_t, device_rules.weekend_t, device_rules.rule_type  "
+			+ "FROM device_rules WHERE device_rules.device_id = ? AND device_rules.removed = 0 ";
 
 	/**
 	 * Select by IP-address or name from table "device" statement
 	 */
 	public final static String SELECT_BY_IP_NAME = "SELECT id, community, name, removed, ip  FROM device WHERE (ip = ?  OR name =?) AND removed = 0";
-
 	/**
 	 * Select by id from table "device" statement
 	 */
@@ -83,6 +94,10 @@ public class JobConstants {
 	 */
 	public final static String MARK_FOR_REMOVING_DEVICE_BY_NAME = "UPDATE device SET removed = 1 WHERE name = ?";
 	
+	/**
+	 * update field removed statement
+	 */
+	public final static String MARK_FOR_REMOVING_DEVICE_RULE_BY_ID = "UPDATE device_rules SET removed = 1 WHERE id = ?";
 	
 	/**
 	 * update field removed for jobs statement
@@ -132,12 +147,11 @@ public class JobConstants {
 	 */
 	public final static String SELECT_SUNNY_DAY_LENGTH = "SELECT sunny_day.day, sunny_day.off_ts, sunny_day.on_ts"
 			+ " FROM sunny_day ";
-	/**
-	 * Insert jobs sunny day length (ON)
-	 * 
-	 * 
-	 */
 	
+	public final static int DEVICE_RULE_TYPE_OFF = 1; 
+	
+	
+	public final static int DEVICE_RULE_TYPE_ON = 2; 
 	
 }
 

@@ -251,5 +251,47 @@ public class SnmpService
 			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
 		}
     }
+	
+	@GET
+	@Path("/scheduler/device_rule/insert")
+    public Response deviceRuleInsert(
+    @QueryParam("device_name") String device_name,
+    @QueryParam("work_t") String workT,
+    @QueryParam("weekend_t") String weekendT,
+    @QueryParam("rule_type") int ruleType)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					insertDeviceRule(device_name, workT, weekendT, ruleType)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
+	
+	@GET
+	@Path("/scheduler/device_rule/remove")
+    public Response deviceRuleRemove(
+    @QueryParam("id") int id)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.
+					removeElement(JobConstants.MARK_FOR_REMOVING_DEVICE_RULE_BY_ID,id)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
+	
+	@GET
+	@Path("/scheduler/device_rule/show")
+    public Response deviceRulesShow(
+    @QueryParam("device_name") String  deviceName)
+    {	
+		try {
+			return Response.status(Response.Status.OK).entity(JobsTableAgregator.showDeviceRules(deviceName)).build(); 
+		} catch (ClassNotFoundException | SQLException e) {
+			return Response.status(Response.Status.OK).entity(e.toString()).build(); 
+		}
+    }
+	
 
 }

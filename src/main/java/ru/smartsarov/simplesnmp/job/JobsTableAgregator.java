@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -291,11 +293,12 @@ public class JobsTableAgregator {
 	        
 	        //read file and prepare Object...param to QueryRunner
 	        try(BufferedReader b = new BufferedReader(new FileReader(f))) {	
+	        	b.readLine();
 	        	 while ((readLine = b.readLine()) != null) {   	
 	        		    line = readLine.split(";");
 	        		    List<Object>tmp = new ArrayList<Object>();
-	        		    tmp.add(line[5]);
-	        		    tmp.add(line[6]);
+	        		    tmp.add(line[1]);
+	        		    tmp.add(line[2]);
 	               		ts_list.add(tmp.toArray());
 	             }    
 	        }
@@ -348,7 +351,23 @@ public class JobsTableAgregator {
     		List<SunnyDayTable>sunnyList = getRecordList(SunnyDayTable.class, 
     				JobConstants.SELECT_SUNNY_DAY_LENGTH, conn, (Object[])null);
     		
-    		
+    		//get rules for creating schedule
+    		List<DeviceRulesTable> dvrRule = getRecordList(DeviceRulesTable.class, JobConstants.SELECT_DEVICE_RULE_BY_DEVICE_ID_AND_TYPE,
+    				 conn, rs_device.getId(), JobConstants.DEVICE_RULE_TYPE_OFF);
+    		String workOff="";
+    		String weekendOff="";
+    		if (!dvrRule.isEmpty()) {
+    			workOff = dvrRule.get(0).getWork_t();
+    			weekendOff = dvrRule.get(0).getWeekend_t();
+    		}
+    		dvrRule = getRecordList(DeviceRulesTable.class, JobConstants.SELECT_DEVICE_RULE_BY_DEVICE_ID_AND_TYPE,
+   				 conn, rs_device.getId(), JobConstants.DEVICE_RULE_TYPE_ON);
+    		String workOn="";
+    		String weekendOn="";
+    		if (!dvrRule.isEmpty()) {
+    			workOn = dvrRule.get(0).getWork_t();
+    		    weekendOn = dvrRule.get(0).getWeekend_t();
+    		}
     		
     		
     		//create List of params using LocalDateTime
@@ -356,11 +375,22 @@ public class JobsTableAgregator {
             LocalDate ld = LocalDate.now();
             int year = ld.getYear();
             int nextDay=0;
+            String tmpDayTime="";
     		while(ld.plusDays(1).getYear()!=year+1) {// Run while not next year
     			nextDay = (ld.getDayOfYear() > 364) ? 0 : 1;
     			List<Object> tmp = new ArrayList<>();
+    			
+    			if(workOff!="") {
+    				if(ld.plusDays(nextDay).getDayOfWeek().equals(DayOfWeek.SATURDAY) || ld.plusDays(nextDay).getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+    					tmpDayTime=weekendOff;
+    				}else {
+    					tmpDayTime=workOff;
+    				}
+    			}else {
+        				tmpDayTime = sunnyList.get(ld.getDayOfYear()-1+nextDay).getOff_ts();
+    			}
     			tmp.add(LocalDateTime.of(ld.plusDays(nextDay), 
-    					LocalTime.parse(sunnyList.get(ld.getDayOfYear()-1+nextDay).getOff_ts(), DateTimeFormatter.ISO_LOCAL_TIME)).
+    					LocalTime.parse(tmpDayTime, DateTimeFormatter.ISO_LOCAL_TIME)).
     					toEpochSecond(ZoneOffset.ofHours(3)));
     			tmp.add(2);
     			tmp.add(rs_user.getId());
@@ -369,6 +399,15 @@ public class JobsTableAgregator {
     			tmp.add(true);
     			jobSunny.add(tmp.toArray());
     			
+    			if(workOn!="") {
+    				if(ld.plusDays(nextDay).getDayOfWeek().equals(DayOfWeek.SATURDAY) || ld.plusDays(nextDay).getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+    					tmpDayTime=weekendOn;
+    				}else {
+    					tmpDayTime=workOn;
+    				}
+    			}else {
+        				tmpDayTime = sunnyList.get(ld.getDayOfYear()-1+nextDay).getOff_ts();
+    			}
     			tmp = new ArrayList<>();
     			tmp.add(LocalDateTime.of(ld.plusDays(nextDay), 
     					LocalTime.parse(sunnyList.get(ld.getDayOfYear()-1+nextDay).getOn_ts(), DateTimeFormatter.ISO_LOCAL_TIME)).
@@ -396,5 +435,68 @@ public class JobsTableAgregator {
 		}   	
     	return getJsonMessage("Sunny day lenght schedule was added for device "+ deviceName);	
     }
+    
+	/**
+	 * Generalized method for adding a new device rule
+	 * 
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 * 
+	 */
+	public static String insertDeviceRule(String deviceName, String workT, String weekendT, int ruleType)
+			throws ClassNotFoundException, SQLException {
+		Connection conn = getConnect();
+		try {
+			// checking for device_id existence
+			String str;
+			DeviceTable rs_device = isRecordExist(DeviceTable.class, JobConstants.SELECT_BY_NAME, conn, deviceName);
+			if (rs_device == null) {
+				str = "Device " + deviceName + " is not registered in system";
+				return getJsonMessage(str);
+			}
+			if(getRecordList(DeviceRulesTable.class, JobConstants.SELECT_DEVICE_RULE_BY_DEVICE_ID_AND_TYPE, conn, rs_device.getId(), ruleType).size()!=0) {
+				str = "The rule for " + deviceName +" with type "+ String.valueOf(ruleType) + " is exist";
+				return getJsonMessage(str);
+			}
+			try{LocalTime.parse(workT, DateTimeFormatter.ISO_LOCAL_TIME);
+				}catch(DateTimeParseException e) {
+					return getJsonMessage("parameter workT = "+String.valueOf(workT)+" - Bad format. Try HH:MM:SS");
+				}
+			try{LocalTime.parse(weekendT, DateTimeFormatter.ISO_LOCAL_TIME);
+			}catch(DateTimeParseException e) {
+				return getJsonMessage("parameter weekendT = "+String.valueOf(weekendT)+" - Bad format. Try HH:MM:SS");
+			}
+
+				new QueryRunner().update(conn, JobConstants.INSERT_DEVICE_RULE, rs_device.getId(), workT, weekendT, ruleType);
+				conn.commit();
+				return getJsonMessage("new record was added");
+		} finally {
+			DbUtils.close(conn);
+		}
+	}
+	/**
+	 * Generalized method for get a device rules
+	 * 
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 * 
+	 */
+	public static String showDeviceRules(String deviceName)
+			throws ClassNotFoundException, SQLException {
+		Connection conn = getConnect();
+		try {
+			// checking for device_id existence
+			String str;
+			DeviceTable rs_device = isRecordExist(DeviceTable.class, JobConstants.SELECT_BY_NAME, conn, deviceName);
+			if (rs_device == null) {
+				str = "Device " + deviceName + " is not registered in system";
+				return getJsonMessage(str);
+			}		
+				return getJsonSelect(DeviceRulesTable.class, JobConstants.SELECT_DEVICE_RULE_BY_DEVICE_ID, rs_device.getId());
+		} finally {
+			DbUtils.close(conn);
+		}
+	}
+    
     
 }

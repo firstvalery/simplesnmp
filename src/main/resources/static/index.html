@@ -10,7 +10,7 @@
 <body>
 	<p>
 	<h2>Описание модуля "Освещение"</h2>
-	<p>Данный модуль управляет освещением зданий. Реализовано оперативное включение и отключение, работа по расписанию. Для работы по расписанию необходимо зарегистрировать в системе пользователя, устройство управления нагрузкой, назначить устройству интерфейс для управления про протололу SNMPv1 </p>
+	<p>Данный модуль управляет освещением зданий. Реализовано оперативное включение и отключение, работа по расписанию, автоматизированное формирование расписания. Для работы по расписанию необходимо зарегистрировать в системе пользователя, устройство управления нагрузкой, назначить устройству интерфейс для управления про протололу SNMPv1 </p>
 	<p>
 	<h2>Описание методов модуля освещение</h2>
 	<p>!ВНИМАНИЕ! МОДУЛЬ УПРАВЛЯЕТ СИЛОВЫМИ ЦЕПЯМИ 0,4kV. БУДЬТЕ ОСТОРОЖНЫ!</p>
@@ -27,7 +27,11 @@
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/device/show">http://sarov.us.to:9902/snmp/scheduler/device/show</a> - отобразить устройства. GET</li>		
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/users/remove">http://sarov.us.to:9902/snmp/scheduler/users/remove</a> - удалить юзера. GET queryparam. user_name=Ivan Ivanov</li>	
 	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/device/remove">http://sarov.us.to:9902/snmp/scheduler/device/remove</a> - удалить устройство. GET queryparam. name=Moxa7410</li>	
-	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/sunnyjob/generate">http://sarov.us.to:9902/snmp/scheduler/sunnyjob/generate</a> - Установить расписание, основанное на продолжительности светогого дня до конца года. GET queryparam. device=ERD&user=Kalachev</li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/sunnyjob/generate">http://sarov.us.to:9902/snmp/scheduler/sunnyjob/generate</a> - Установить автоматическое расписание до конца года. GET queryparam. device=ERD&user=Kalachev</li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/sunnyjob/remove">http://sarov.us.to:9902/snmp/scheduler/sunnyjob/remove</a> - Удалить автоматическое расписание до конца года. GET queryparam. device=ERD</li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/device_rule/insert">http://sarov.us.to:9902/snmp/scheduler/device_rule/insert</a> - Добавить правило для автоматического формирования расписания. Суть правила в том, что можно указать время отключения/включения освещения в будни и выходные дни. В отсутствии правил расписание генерируется на основе времени восхода и заката солнца.  GET queryparam. ?device_name=ERD&work_t=03:00:00&weekend_t=05:00:00&rule_type=1. rule_type =1 - правило для отключения, 2 - правило для включения </li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/device_rule/show">http://sarov.us.to:9902/snmp/scheduler/device_rule/show</a> - Показать применяемые правила для устройства. GET queryparam. ?device_name=ERD </li>	
+	    <li><a target="_blank" rel="noopener noreferrer" href="http://sarov.us.to:9902/snmp/scheduler/device_rule/remove">http://sarov.us.to:9902/snmp/scheduler/device_rule/remove</a> - Удалить конкретное правило. GET queryparam. ?id=1 </li>	   
 	</ul>
 </body>
 </html>
