@@ -39,7 +39,8 @@ public class JobConstants {
 			"	PRIMARY KEY(id));";
 
 	
-	
+	public final static String CREATE_LOG_TABLE =" CREATE TABLE IF NOT EXISTS log"+ 
+			"( id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, device TEXT, text TEXT, removed NUMERIC NOT NULL DEFAULT 0 )";
 	
 	
 	/**
@@ -169,6 +170,17 @@ public class JobConstants {
 	
 	public final static int DEVICE_RULE_TYPE_ON = 2; 
 	
+	/**
+	 * Select previous state of device from log
+	 */
+	public final static String SELECT_LOGGED_DEVICE = "SELECT max(log.ts), log.text FROM log WHERE removed = 0 AND log.device = ?";
+
+	/**
+	 * Insert new state of device
+	 */
+	public final static String INSERT_DEVICE_LOG = "INSERT INTO log (ts, device, text) VALUES (?,?,?)";
+
+
 }
 
 

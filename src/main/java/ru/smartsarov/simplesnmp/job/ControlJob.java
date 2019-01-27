@@ -15,6 +15,7 @@ public class ControlJob implements Job{
 
 				try {
 					JobsTableAgregator.getCurrentJob(60);
+					JobsTableAgregator.getInfoFromDevices();
 				} catch (ClassNotFoundException | SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

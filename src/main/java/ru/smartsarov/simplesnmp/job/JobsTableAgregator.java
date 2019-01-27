@@ -3,6 +3,7 @@ package ru.smartsarov.simplesnmp.job;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,9 +27,13 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import ru.smartsarov.simplesnmp.ERDSndRcv;
+import ru.smartsarov.simplesnmp.ERDState;
 import ru.smartsarov.simplesnmp.Props;
+import ru.smartsarov.simplesnmp.SnrErd4c;
+import ru.smartsarov.simplesnmp.SnrErd4cState;
 
 public class JobsTableAgregator {
 
@@ -252,6 +257,26 @@ public class JobsTableAgregator {
 		Connection conn = getConnect();
 		try {
 			long curTimestamp = Instant.now().getEpochSecond();// take a current timestamp
+			
+			
+			/*
+			 * This code added for logging 
+			 **/
+			try(FileWriter writer = new FileWriter("C:/conf/simplesnmp/log.txt", true)){
+				ERDState erdst = new Gson().fromJson(ERDSndRcv.erdGetInfo(), ERDState.class);
+				writer.write(Instant.ofEpochMilli(erdst.timestamp).atOffset(ZoneOffset.ofHours(3)).toString()+"   "+erdst.mp);
+				writer.append('\n');
+				writer.flush();
+			}catch(IOException ex){
+				//TODO
+			}catch(JsonSyntaxException ex) {
+				//TODO
+			}
+			
+			
+			
+			
+			
 			List<JobTable> jobList = getRecordList(JobTable.class, JobConstants.SELECT_JOBS_BETWEEN, conn, curTimestamp,
 					curTimestamp + delta);
 			if (jobList != null && !jobList.isEmpty()) {
@@ -494,6 +519,53 @@ public class JobsTableAgregator {
 				return getJsonMessage(str);
 			}		
 				return getJsonSelect(DeviceRulesTable.class, JobConstants.SELECT_DEVICE_RULE_BY_DEVICE_ID, rs_device.getId());
+		} finally {
+			DbUtils.close(conn);
+		}
+	}
+	
+	
+	/**
+	 * Device state logging 
+	 * @throws SQLException 
+	 * TODO
+	 **/
+	public static String getInfoFromDevices() throws ClassNotFoundException, SQLException {
+		Connection conn = getConnect();
+		try {
+			Gson gs= new Gson();
+			LogTable rs = isRecordExist(LogTable.class, JobConstants.SELECT_LOGGED_DEVICE, conn, "SNRERD4C");	
+			if(rs.getText()!=null){
+				try {
+					SnrErd4cState snrDev = gs.fromJson(rs.getText(), SnrErd4cState.class);
+					String tmpstr = SnrErd4c.getContactState();
+					SnrErd4cState snrDevnew = gs.fromJson(tmpstr, SnrErd4cState.class);
+					if (snrDev.compareTo(snrDevnew)!=0) {
+						Object[] params = new Object[3];
+						params[0]=Instant.ofEpochMilli(snrDevnew.ts).atZone(ZoneOffset.ofHours(3));
+						params[1]="SNRERD4C";
+						params[2]=tmpstr;
+						new QueryRunner().update(conn, JobConstants.INSERT_DEVICE_LOG, params);
+						conn.commit();
+					}
+				}catch(JsonSyntaxException e) {
+					//TODO
+				}	
+			}else {
+				try {
+					String tmpstr = SnrErd4c.getContactState();
+					SnrErd4cState snrDevnew = gs.fromJson(tmpstr, SnrErd4cState.class);
+					Object[] params = new Object[3];
+					params[0]=Instant.ofEpochMilli(snrDevnew.ts).atZone(ZoneOffset.ofHours(3));
+					params[1]="SNRERD4C";
+					params[2]=tmpstr;
+					new QueryRunner().update(conn, JobConstants.INSERT_DEVICE_LOG, params);
+					conn.commit();
+				}catch(JsonSyntaxException e) {
+					//TODO
+				}
+			}	
+			return null;
 		} finally {
 			DbUtils.close(conn);
 		}

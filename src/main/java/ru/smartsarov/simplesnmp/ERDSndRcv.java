@@ -18,7 +18,7 @@ public class ERDSndRcv {
 	static final int REPEAT_NUMBER = 2; 
 	
 	
-	/*
+	/**
 	 * Static method for send PDU to reset contact DO1
 	 * 
 	 * */
@@ -35,7 +35,7 @@ public class ERDSndRcv {
 		return erdGetInfo();
 	}
 	
-	/*
+	/**
 	 * Static method for send PDU to reset contact DO1
 	 * 
 	 * */
@@ -45,7 +45,7 @@ public class ERDSndRcv {
 	}
 	
 	
-	/*
+	/**
 	 * Static method for send to 2 PDU to reset contact DO2
 	 * 
 	 * */
@@ -70,7 +70,7 @@ public class ERDSndRcv {
 		return erdGetInfo();
 	}	
 	
-	/*
+	/**
 	 * Static method for send to 2 PDU to reset contact DO2
 	 * 
 	 * */
@@ -92,11 +92,11 @@ public class ERDSndRcv {
 		st.snmpSetInt(ip, community, REMOTE_CONTROL_CONTACT_DO2_OID, MAN_OFF_SMART_CONTACT_DO1_VALUE);	
 	}
 	
-	/*
+	/**
 	 * Static method to Get Information about state of DO/DI contacts
 	 * 
 	 * */
-	static String erdGetInfo() {
+	public static String erdGetInfo() {
 		SnmpTest st = new SnmpTest();
 		String host = Props.get().getProperty("simplesnmp.ip", "127.0.0.1");
 		String community = Props.get().getProperty("simplesnmp.read_community", "public");

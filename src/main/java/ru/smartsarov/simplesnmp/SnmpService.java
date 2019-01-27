@@ -73,7 +73,26 @@ public class SnmpService
 	
 	
 	
+	@GET
+	@Path("/alarm_button/on")
+    public Response setButtonOn(@QueryParam("number") int number)
+    {
+		return Response.status(Response.Status.OK).entity(SnrErd4c.erdSendOn(number)).build();
+    }
 	
+	@GET
+	@Path("/alarm_button/off")
+    public Response setButtonOff(@QueryParam("number") int number)
+    {
+		return Response.status(Response.Status.OK).entity(SnrErd4c.erdSendOff(number)).build();
+    }
+	
+	@GET
+	@Path("/alarm_button/state")
+    public Response getButtonState(@QueryParam("number") int number)
+    {
+		return Response.status(Response.Status.OK).entity(SnrErd4c.getContactState()).build();
+    }
 	
 	
 

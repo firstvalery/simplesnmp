@@ -47,10 +47,10 @@ public void snmpSetInt(String host, String community, String strOID, int Value) 
   }
 }
  
-/*
+/**
  * Create Target with required parameters
  * 
- * */
+ */
 private static CommunityTarget createTarget(String host, String community, int retries, int timeout) {
 	
     host= host+"/"+	SnmpConstants.DEFAULT_COMMAND_RESPONDER_PORT;//xxx.xxx.xxx.xxx/161 - 
