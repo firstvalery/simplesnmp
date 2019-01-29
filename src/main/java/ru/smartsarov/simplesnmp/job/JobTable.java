@@ -18,13 +18,15 @@ public class JobTable {
 	@Expose
 	private String name;
 	
+	private String type;
+	
 	private String community;
 	private String ip;
 	private boolean removed;
 	@Expose
 	private boolean sunny;
 	
-	public JobTable(int id, long job_ts, String user, long set_ts, boolean done, int command, String name, String ip,
+	public JobTable(int id, long job_ts, String user, long set_ts, boolean done, int command, String name, String type, String ip,
 			boolean removed, String community, boolean sunny) {
 		this.id = id;
 		this.job_ts = job_ts;
@@ -33,6 +35,7 @@ public class JobTable {
 		this.done = done;
 		this.command = command;
 		this.name = name;
+		this.type = type;
 		this.ip = ip;
 		this.removed = removed;
 		this.setCommunity(community);
@@ -47,6 +50,7 @@ public class JobTable {
 		this.done = false;
 		this.command = 0;
 		this.name = "";
+		this.type = "";
 		this.ip = "";
 		this.removed = false;
 		this.setCommunity("");
@@ -123,6 +127,14 @@ public class JobTable {
 
 	public void setSunny(boolean sunny) {
 		this.sunny = sunny;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	

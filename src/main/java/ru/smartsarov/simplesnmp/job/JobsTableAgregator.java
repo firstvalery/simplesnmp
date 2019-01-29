@@ -29,11 +29,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import ru.smartsarov.simplesnmp.ERDSndRcv;
 import ru.smartsarov.simplesnmp.ERDState;
 import ru.smartsarov.simplesnmp.Props;
-import ru.smartsarov.simplesnmp.SnrErd4c;
 import ru.smartsarov.simplesnmp.SnrErd4cState;
+import ru.smartsarov.simplesnmp.devicefactory.ERDSndRcv;
+import ru.smartsarov.simplesnmp.devicefactory.ErdFamilyJobCreator;
+import ru.smartsarov.simplesnmp.devicefactory.SnrErd4c;
 
 public class JobsTableAgregator {
 
@@ -49,30 +50,6 @@ public class JobsTableAgregator {
 	}
 
 
-
-	/**
-	 * Do the job and set "done" to true Uses a connection as parameter. Passes an
-	 * exception SQLException further
-	 */
-
-	private static String doJob(JobTable job) {
-		switch (job.getCommand()) {
-		case 1:
-			ERDSndRcv.erdSendOn(job.getIp(), job.getCommunity());
-			// System.out.println(Instant.ofEpochSecond(job.getJob_ts(), 0) + " to device "+
-			// job.getName()+ " was send command On");
-			break;
-		case 2:
-			ERDSndRcv.erdSendOff(job.getIp(), job.getCommunity());
-			// System.out.println(Instant.ofEpochSecond(job.getJob_ts(), 0) + " to device "+
-			// job.getName()+ " was send command Off");
-			break;
-		default:
-			break;
-		}
-		job.setDone(true);// Set "done" for job
-		return String.valueOf(job.getId());
-	}
 
 	/**
 	 * Creating tables instrument
@@ -273,18 +250,14 @@ public class JobsTableAgregator {
 			}catch(JsonSyntaxException ex) {
 				//TODO
 			}
-			
-			
-			
-			
+
 			
 			List<JobTable> jobList = getRecordList(JobTable.class, JobConstants.SELECT_JOBS_BETWEEN, conn, curTimestamp,
 					curTimestamp + delta);
 			if (jobList != null && !jobList.isEmpty()) {
 				StringBuilder jobsId = new StringBuilder(10);
 				jobList.stream().forEach(j -> {// do job for each element
-
-					jobsId.append(doJob(j)).append(",");
+					jobsId.append(new ErdFamilyJobCreator().doJob(j)).append(",");
 				});
 				/*
 				 * StringBuilder sb = new StringBuilder(10);//make string like this:
@@ -529,17 +502,19 @@ public class JobsTableAgregator {
 	/**
 	 * Device state logging 
 	 * @throws SQLException 
-	 * TODO
+	 * Logging the AlarmButtons State
 	 **/
 	public static String getInfoFromDevices() throws ClassNotFoundException, SQLException {
 		Connection conn = getConnect();
+		String ipAddr = Props.get().getProperty("simplesnmp.alarm_ip","127.0.0.1");
+		String community = Props.get().getProperty("simplesnmp.alarm_write_community","public");
 		try {
 			Gson gs= new Gson();
 			LogTable rs = isRecordExist(LogTable.class, JobConstants.SELECT_LOGGED_DEVICE, conn, "SNRERD4C");	
 			if(rs.getText()!=null){
 				try {
 					SnrErd4cState snrDev = gs.fromJson(rs.getText(), SnrErd4cState.class);
-					String tmpstr = SnrErd4c.getContactState();
+					String tmpstr = SnrErd4c.getContactState(ipAddr, community);
 					SnrErd4cState snrDevnew = gs.fromJson(tmpstr, SnrErd4cState.class);
 					if (snrDev.compareTo(snrDevnew)!=0) {
 						Object[] params = new Object[3];
@@ -554,7 +529,7 @@ public class JobsTableAgregator {
 				}	
 			}else {
 				try {
-					String tmpstr = SnrErd4c.getContactState();
+					String tmpstr = SnrErd4c.getContactState(ipAddr,community);
 					SnrErd4cState snrDevnew = gs.fromJson(tmpstr, SnrErd4cState.class);
 					Object[] params = new Object[3];
 					params[0]=Instant.ofEpochMilli(snrDevnew.ts).atZone(ZoneOffset.ofHours(3));

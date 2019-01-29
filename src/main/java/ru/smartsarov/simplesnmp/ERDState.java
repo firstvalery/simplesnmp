@@ -9,7 +9,7 @@ public class ERDState implements Comparable<ERDState> {
 	public boolean mp = false;
 	public boolean rs = false;
 	
-	ERDState(long ts, boolean ec, boolean mp, boolean rs){
+	public ERDState(long ts, boolean ec, boolean mp, boolean rs){
 		this.timestamp = ts;
 		quality = "GOOD";
 		this.ec = ec;
@@ -17,7 +17,7 @@ public class ERDState implements Comparable<ERDState> {
 		this.rs = rs;
 	}
 	
-	ERDState(long ts){
+	public ERDState(long ts){
 		this.timestamp = ts;
 		quality = "BAD";
 		this.ec = false;

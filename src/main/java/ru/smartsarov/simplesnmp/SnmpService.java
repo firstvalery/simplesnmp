@@ -14,6 +14,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ru.smartsarov.simplesnmp.devicefactory.ERDSndRcv;
+import ru.smartsarov.simplesnmp.devicefactory.SnrErd4c;
 import ru.smartsarov.simplesnmp.job.DeviceTable;
 import ru.smartsarov.simplesnmp.job.JobConstants;
 import ru.smartsarov.simplesnmp.job.JobTable;
@@ -77,21 +79,30 @@ public class SnmpService
 	@Path("/alarm_button/on")
     public Response setButtonOn(@QueryParam("number") int number)
     {
-		return Response.status(Response.Status.OK).entity(SnrErd4c.erdSendOn(number)).build();
+		return Response.status(Response.Status.OK).entity(SnrErd4c.erdSendOnAndCheck(number,
+						Props.get().getProperty("simplesnmp.alarm_ip", "127.0.0.1"), 
+							Props.get().getProperty("simplesnmp.alarm_write_community", "public")))
+								.build();
     }
 	
 	@GET
 	@Path("/alarm_button/off")
     public Response setButtonOff(@QueryParam("number") int number)
     {
-		return Response.status(Response.Status.OK).entity(SnrErd4c.erdSendOff(number)).build();
+		return Response.status(Response.Status.OK).entity(SnrErd4c.erdSendOffAndCheck(number,
+						Props.get().getProperty("simplesnmp.alarm_ip", "127.0.0.1"), 
+							Props.get().getProperty("simplesnmp.alarm_write_community", "public")))
+								.build();
     }
 	
 	@GET
 	@Path("/alarm_button/state")
     public Response getButtonState(@QueryParam("number") int number)
     {
-		return Response.status(Response.Status.OK).entity(SnrErd4c.getContactState()).build();
+		return Response.status(Response.Status.OK).entity(SnrErd4c.getContactState(
+						Props.get().getProperty("simplesnmp.alarm_ip", "127.0.0.1"), 
+							Props.get().getProperty("simplesnmp.alarm_write_community", "public")))
+								.build();
     }
 	
 	

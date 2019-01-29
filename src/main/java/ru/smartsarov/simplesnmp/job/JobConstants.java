@@ -12,7 +12,7 @@ public class JobConstants {
 	 * CREATE TABLE `device` constant
 	 */
 	public final static String CREATE_DEVICE_TABLE = "CREATE TABLE IF NOT EXISTS device (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"+
-			"community TEXT, name TEXT NOT NULL, ip TEXT NOT NULL, removed NUMERIC NOT NULL DEFAULT 0)";
+			"community TEXT, name TEXT NOT NULL, type TEXT, ip TEXT NOT NULL, removed NUMERIC NOT NULL DEFAULT 0)";
 	
 	/**
 	 * CREATE TABLE `users` constant
@@ -73,11 +73,11 @@ public class JobConstants {
 	/**
 	 * Select by IP-address or name from table "device" statement
 	 */
-	public final static String SELECT_BY_IP_NAME = "SELECT id, community, name, removed, ip  FROM device WHERE (ip = ?  OR name =?) AND removed = 0";
+	public final static String SELECT_BY_IP_NAME = "SELECT device.id, device.community, device.name, device.type, device.removed, device.ip  FROM device WHERE (ip = ?  OR name =?) AND removed = 0";
 	/**
 	 * Select by id from table "device" statement
 	 */
-	public final static String SELECT_BY_NAME = "SELECT id, community, name, removed, ip  FROM device WHERE name = ? AND removed = 0";
+	public final static String SELECT_BY_NAME = "SELECT device.id, device.community, device.name, device.type, device.removed, device.ip  FROM device WHERE name = ? AND removed = 0";
 
 	/**
 	 * Insert new job in table "jobs" statement
@@ -88,7 +88,7 @@ public class JobConstants {
 	 * Select list of jobs by min and mix timestamps statement
 	 */	
 	public final static String SELECT_JOBS_BETWEEN = "select jobs.id, jobs.job_ts, users.user_name, jobs.set_ts,"+
-			" jobs.command, device.name, device.ip, jobs.done, jobs.removed, jobs.sunny, device.community"+
+			" jobs.command, device.name, device.type, device.ip, jobs.done, jobs.removed, jobs.sunny, device.community"+
 			" from jobs"+
 			" join users on jobs.user = users.id and users.removed = 0"+
 			" join device on jobs.device_id = device.id and device.removed = 0"+
@@ -140,7 +140,7 @@ public class JobConstants {
 	/**
 	 * Select all devices statement
 	 */
-	public final static String SELECT_DEVICES = "SELECT device.id, device.community, device.ip, device.name FROM device WHERE removed = 0";
+	public final static String SELECT_DEVICES = "SELECT device.id, device.community, device.ip, device.name, device.type FROM device WHERE removed = 0";
 	
 	/**
 	 * Select jobs statement

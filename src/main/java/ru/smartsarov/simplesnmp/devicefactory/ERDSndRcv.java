@@ -1,12 +1,17 @@
-package ru.smartsarov.simplesnmp;
+package ru.smartsarov.simplesnmp.devicefactory;
 
 import java.time.Instant;
 
 import com.google.gson.Gson;
 
+import ru.smartsarov.simplesnmp.ERDState;
+import ru.smartsarov.simplesnmp.Props;
+import ru.smartsarov.simplesnmp.SnmpTest;
+import ru.smartsarov.simplesnmp.job.JobTable;
 
 
-public class ERDSndRcv {
+
+public class ERDSndRcv implements DoJob {
 	static final String RESET_SMART_CONTACT_DO1_OID = "1.3.6.1.4.1.40418.2.2.2.1";
 	static final String REMOTE_CONTROL_CONTACT_DO2_OID = "1.3.6.1.4.1.40418.2.2.2.3 ";
 	static final String MONITOR_SENSOR1 = "1.3.6.1.4.1.40418.2.2.3.3";
@@ -22,7 +27,7 @@ public class ERDSndRcv {
 	 * Static method for send PDU to reset contact DO1
 	 * 
 	 * */
-	static String erdSendOn() {
+	public static String erdSendOn() {
 		SnmpTest st = new SnmpTest();
 		st.snmpSetInt(Props.get().getProperty("simplesnmp.ip", "127.0.0.1"), Props.get().getProperty("simplesnmp.write_community", "public"), RESET_SMART_CONTACT_DO1_OID, RESET_SMART_CONTACT_DO1_VALUE);	
 	
@@ -49,7 +54,7 @@ public class ERDSndRcv {
 	 * Static method for send to 2 PDU to reset contact DO2
 	 * 
 	 * */
-	static String erdSendOff() {
+	public static String erdSendOff() {
 		SnmpTest st = new SnmpTest();
 		String host = Props.get().getProperty("simplesnmp.ip", "127.0.0.1");
 		String community = Props.get().getProperty("simplesnmp.write_community", "public");
@@ -113,5 +118,18 @@ public class ERDSndRcv {
 			}
 		}
 		return gs.toJson(new ERDState(Instant.now().toEpochMilli()));
+	}
+
+	/**
+	 * DoJob interface implementation
+	 */
+	@Override
+	public void doCmd(JobTable j) {
+		if(j.getCommand()==1) {
+			erdSendOn(j.getIp(),j.getCommunity());
+		}
+		if(j.getCommand()==2) {
+			erdSendOff(j.getIp(),j.getCommunity());
+		}
 	}
 }

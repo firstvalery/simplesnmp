@@ -8,14 +8,18 @@ public class DeviceTable {
 	private String community;
 	@Expose
 	private String name;
+	@Expose
+	private String type;
+
 	private boolean removed;
 	@Expose
 	private String ip;
 
-	public DeviceTable(int id, String community, String name, boolean removed, String ip) {
+	public DeviceTable(int id, String community, String name,String type, boolean removed, String ip) {
 		this.id = id;
 		this.community = community;
 		this.name = name;
+		this.type = type;
 		this.removed = removed;
 		this.ip = ip;
 	}
@@ -24,6 +28,7 @@ public class DeviceTable {
 		this.id = 0;
 		this.community = "";
 		this.name = "";
+		this.type = "";
 		this.removed = false;
 		this.ip = "";
 	}
@@ -57,5 +62,11 @@ public class DeviceTable {
 	public void setRemoved(boolean removed) {
 		this.removed = removed;
 	}
-	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 }
